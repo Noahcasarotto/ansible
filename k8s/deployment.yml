@@ -1,0 +1,20 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: simple-app
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: simple-app
+  template:
+    metadata:
+      labels:
+        app: simple-app
+    spec:
+      containers:
+      - name: simple-app
+        image: gcr.io/sublime-flux-414616/simple-app:latest
+        ports:
+        - containerPort: 3000 
+        imagePullPolicy: Always  # Optional but ensures the latest image is pulled
