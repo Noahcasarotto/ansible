@@ -1,6 +1,7 @@
 ---
-- name: Install and start Nginx
+- name: Install and configure Nginx with basic website
   hosts: servers  # This refers to the [servers] group in your inventory.ini
+  become: false
 
   tasks:
     - name: Install Nginx
@@ -12,4 +13,51 @@
       command: brew services start nginx
       register: nginx_start
       changed_when: "'Successfully started' in nginx_start.stdout"
-      failed_when: nginx_start.rc != 0 
+      failed_when: nginx_start.rc != 0
+
+    - name: Create web content directory
+      file:
+        path: /usr/local/var/www/
+        state: directory
+        mode: '0755'
+
+    - name: Create basic index.html
+      copy:
+        content: |
+          <!DOCTYPE html>
+          <html>
+          <head>
+              <title>Welcome to My Site</title>
+          </head>
+          <body>
+              <h1>Hello from Ansible!</h1>
+              <p>This page was configured automatically.</p>
+          </body>
+          </html>
+        dest: /usr/local/var/www/index.html
+        mode: '0644'
+
+    - name: Configure Nginx
+      copy:
+        content: |
+          server {
+              listen 8080;
+              server_name localhost;
+              
+              root /usr/local/var/www/;
+              index index.html;
+              
+              location / {
+                  try_files $uri $uri/ =404;
+              }
+          }
+        dest: /usr/local/etc/nginx/servers/default.conf
+        mode: '0644'
+      notify: Restart Nginx
+
+  handlers:
+    - name: Restart Nginx
+      command: brew services restart nginx
+      register: nginx_restart
+      changed_when: "'Successfully started' in nginx_restart.stdout"
+      failed_when: nginx_restart.rc != 0 
