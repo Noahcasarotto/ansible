@@ -1,0 +1,19 @@
+---
+- name: My First Playbook
+  hosts: all
+  become: yes  # This enables sudo privileges
+  
+  tasks:
+    - name: Update apt cache
+      apt:
+        update_cache: yes
+        cache_valid_time: 3600  # Cache will be valid for 1 hour
+      when: ansible_os_family == "Debian"  # Only run on Debian-based systems
+
+    - name: Install basic packages
+      package:
+        name:
+          - vim
+          - git
+          - curl
+        state: present 

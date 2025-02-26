@@ -1,0 +1,15 @@
+---
+- name: Install and start Nginx
+  hosts: servers  # This refers to the [servers] group in your inventory.ini
+
+  tasks:
+    - name: Install Nginx
+      community.general.homebrew:  # Use the homebrew-specific module
+        name: nginx
+        state: present
+    
+    - name: Start Nginx service
+      command: brew services start nginx
+      register: nginx_start
+      changed_when: "'Successfully started' in nginx_start.stdout"
+      failed_when: nginx_start.rc != 0 
